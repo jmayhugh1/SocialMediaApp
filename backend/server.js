@@ -7,6 +7,7 @@ const loggedinRouter = require("./router/loggedin");
 const jwt = require("jsonwebtoken");
 const session = require("express-session");
 const axios = require("axios");
+const { serverUrl, password } = require("./constants.js");
 
 //functions
 
@@ -41,7 +42,7 @@ app.use("/loggedin", loggedinRouter);
 app.post("/login", async (req, res) => {
   username = req.body.username;
   password = req.body.password;
-  let users = await axios.get("http://localhost:3000/user/getUser");
+  let users = await axios.get(`${serverUrl}/user/getUser`);
 
   let userData = users.data;
   console.log(JSON.stringify(userData, null, 2));
@@ -61,7 +62,7 @@ app.post("/login", async (req, res) => {
   }
 });
 mongoose
-  .connect("mongodb+srv://jmayhugh:Jayden2008@cluster0.5m2i0ib.mongodb.net/")
+  .connect(`mongodb+srv://jmayhugh:${password}@cluster0.5m2i0ib.mongodb.net/`)
   .then(() =>
     app.listen(3000, () => console.log("Server running on port 3000"))
   )
