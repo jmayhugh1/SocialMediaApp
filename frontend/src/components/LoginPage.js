@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changeActive } from "../store/slices/PageSlice";
 import { loginUser, logoutUser } from "../store/slices/UserSlice";
@@ -11,21 +11,35 @@ const LoginPage = () => {
   const user = useSelector((state) => state.user.userName);
   const password = useSelector((state) => state.user.userPassword);
   const loggedIn = useSelector((state) => state.user.loggedIn);
+  const [attemptedUsername, setAttemptedUser] = useState("");
+  const [attemptedPassword, setAttemptedPassword] = useState("");
+
   const handleUserChange = (event) => {
-    dispatch(
-      loginUser({ userName: event.target.value, userPassword: password })
-    );
+    // get the v
+    console.log("user change detected " + event.target.value);
+    setAttemptedUser(event.target.value);
   };
   const handlePasswordChange = (event) => {
-    dispatch(loginUser({ userPassword: event.target.value, userName: user }));
+    // get the v
+    console.log("password change detected " + event.target.value);
+    setAttemptedPassword(event.target.value);
   };
 
   const handleButtonClick = () => {
     console.log("attempting to login");
-    console.log(" the user is " + user);
-    console.log(" the password is " + password);
-    if (user === validusers.username && password === validusers.password) {
-      dispatch(loginUser({ userName: user, userPassword: password }));
+    console.log(" the user is " + attemptedUsername);
+    console.log(" the password is " + attemptedPassword);
+    if (
+      attemptedUsername === validusers.username &&
+      attemptedPassword === validusers.password
+    ) {
+      dispatch(
+        loginUser({
+          userName: attemptedUsername,
+          userPassword: attemptedPassword,
+        })
+      );
+
       dispatch(changeActive("home"));
       console.log("logged in");
     }
@@ -45,18 +59,17 @@ const LoginPage = () => {
               display: "flex",
               justifyContent: "center",
             }}
-            for="exampleFormControlInput1"
+            form="exampleFormControlInput1"
             className="form-label"
           >
             Email address
           </label>
           <input
-            onChange={(event) => handleUserChange(event)}
-            value={user}
             type="email"
             className="form-control"
             id="exampleFormControlInput1"
             placeholder="name@example.com"
+            onChange={handleUserChange}
           />
         </div>
         <div className="mb-3">
@@ -65,18 +78,17 @@ const LoginPage = () => {
               display: "flex",
               justifyContent: "center",
             }}
-            for="exampleFormControlInput2"
+            form="exampleFormControlInput2"
             className="form-label"
           >
             password
           </label>
           <input
-            onChange={(event) => handlePasswordChange(event)}
-            value={password}
             type="password"
             className="form-control"
             id="exampleFormControlInput2"
             placeholder="password"
+            onChange={handlePasswordChange}
           ></input>
         </div>
       </div>
