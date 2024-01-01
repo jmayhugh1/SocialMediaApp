@@ -9,11 +9,13 @@ import Profile from "./components/Profile.js";
 import Header from "./components/Header.js";
 
 function App() {
-  
   return (
     <Provider store={store}>
-      <Header />
+
+      
       <BrowserRouter>
+        <Header />
+
         <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<LoginPage />} />
