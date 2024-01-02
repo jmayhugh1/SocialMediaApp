@@ -1,11 +1,30 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getStorage, uploadBytes, ref } from "firebase/storage";
+import { initializeApp } from "firebase/app";
 import "./MakePost.css";
 const MakePost = (props) => {
+  const firebaseConfig = {
+    storageBucket: "gs://socialmediaapp-c4996.appspot.com",
+  };
+  // Fire base stuff
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+
+  const uploadImage = (imageFile, imagename) => {
+    const storageRef = ref(storage, imagename);
+    uploadBytes(storageRef, imageFile).then((snapshot) => {
+      console.log("Uploaded a blob or file!");
+    });
+    // return the url of the image
+    return firebaseConfig.storageBucket + "/" + imagename;
+  };
+
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userName);
 
   const [image, setImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
 
   const onImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -14,6 +33,7 @@ const MakePost = (props) => {
       let imageObject = URL.createObjectURL(img);
       console.log("imageObject", imageObject);
       setImage(imageObject);
+      setImageFile(img);
     }
   };
   const submitPost = () => {
@@ -21,20 +41,55 @@ const MakePost = (props) => {
     //get the title and body
     let titleToSubmit = document.getElementById("title").value;
     let bodyToSubmit = document.getElementById("postBody").value;
+    console.log(image);
     //get time value
     let timeToSubmit = new Date().getTime();
     let userToSubmit = user;
-
+    if (titleToSubmit === "") {
+      alert("Please enter a title");
+      return;
+    }
+    if (bodyToSubmit === "") {
+      alert("Please enter a body");
+      return;
+    }
+    if (image === null) {
+      alert("Please upload an image");
+      return;
+    }
     //hash the title, body, time and user to save the image
     let stringtohash =
       userToSubmit + titleToSubmit + bodyToSubmit + timeToSubmit;
-    let imageName = stringtohash.hashCode();
-    // save the imsge to the public folder
-
+    // upload the image to firebase
+    // send everything to the backend
+    let response = "";
+    try {
+      response = uploadImage(imageFile, stringtohash);
+    } catch (err) {
+      alert("Error uploading image");
+      console.log("the error from uploading image to fire base is " + err);
+      return;
+    }
+    alert("Post submitted");
+    console.log(
+      "the response from uploading image to fire base is " + response
+    );
+    // send the post to the backend
+    let postToSubmit = {
+      user: userToSubmit,
+      title: titleToSubmit,
+      body: bodyToSubmit,
+      picture: response,
+      likes: 0,
+    };
 
     console.log("submitting post with title " + titleToSubmit);
     console.log("submitting post with body " + bodyToSubmit);
     console.log("submitting post with user " + userToSubmit);
+
+    props.closeButton();
+    setImage(null);
+    URL.revokeObjectURL(image);
   };
   const handleCloseButton = () => {
     props.closeButton();
